@@ -1,22 +1,32 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+  <title>IA Reconhecimento - v1.1</title>
+</head>
+
 <body>
+
+<h1 id="version"></h1>
 
 <h2>Reconhecimento com IA</h2>
 
 <video id="video" autoplay playsinline width="400"></video>
 <br><br>
 
-<button onclick="predict()">Analisar</button>
-
 <h3 id="result">Aguardando...</h3>
-  
+
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-  
+
 <script>
 const video = document.getElementById("video");
 const result = document.getElementById("result");
+
+// versão
+const version = "v1.1";
+document.getElementById("version").innerText =
+  "Versão: " + version + " | " + new Date().toLocaleTimeString();
 
 let model = null;
 
@@ -42,7 +52,10 @@ async function loadModel() {
       URL + "metadata.json"
     );
 
-    result.innerText = "Modelo carregado. Clique em analisar.";
+    result.innerText = "Modelo carregado!";
+
+    // iniciar loop automático
+    loop();
 
   } catch (error) {
     console.error("ERRO AO CARREGAR:", error);
@@ -50,18 +63,11 @@ async function loadModel() {
   }
 }
 
-// analisar imagem
-async function predict() {
+// loop de previsão contínua
+async function loop() {
+  if (!model) return;
+
   try {
-
-    if (!model) {
-      await loadModel();
-    }
-
-    if (!model) return;
-
-    result.innerText = "Analisando...";
-
     const prediction = await model.predict(video);
 
     let best = prediction[0];
@@ -78,7 +84,13 @@ async function predict() {
     console.error("ERRO NA PREVISÃO:", error);
     result.innerText = "Erro ao analisar";
   }
+
+  // repete continuamente
+  setTimeout(loop, 500);
 }
+
+// iniciar automaticamente
+loadModel();
 </script>
 
 </body>
