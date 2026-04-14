@@ -12,9 +12,12 @@
 <h2>Reconhecimento com IA</h2>
 
 <video id="video" autoplay playsinline width="400"></video>
+
 <br><br>
 
 <h3 id="result">Aguardando...</h3>
+
+<img id="outputImage" width="300">
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
@@ -22,13 +25,22 @@
 <script>
 const video = document.getElementById("video");
 const result = document.getElementById("result");
+const outputImage = document.getElementById("outputImage");
 
 // versão
-const version = "v1.1";
+const version = "v1.2";
 document.getElementById("version").innerText =
   "Versão: " + version + " | " + new Date().toLocaleTimeString();
 
 let model = null;
+
+// banco de imagens
+const imagens = {
+  cachorro: "https://placedog.net/400",
+  gato: "https://placekitten.com/400/400",
+  carro: "https://source.unsplash.com/400x400/?car",
+  casa: "https://source.unsplash.com/400x400/?house"
+};
 
 // iniciar câmera
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -53,17 +65,15 @@ async function loadModel() {
     );
 
     result.innerText = "Modelo carregado!";
-
-    // iniciar loop automático
     loop();
 
   } catch (error) {
-    console.error("ERRO AO CARREGAR:", error);
+    console.error(error);
     result.innerText = "Erro ao carregar modelo";
   }
 }
 
-// loop de previsão contínua
+// loop contínuo
 async function loop() {
   if (!model) return;
 
@@ -80,16 +90,20 @@ async function loop() {
 
     result.innerText = "Detectado: " + best.className;
 
+    // troca imagem
+    if (imagens[best.className]) {
+      outputImage.src = imagens[best.className];
+    }
+
   } catch (error) {
-    console.error("ERRO NA PREVISÃO:", error);
+    console.error(error);
     result.innerText = "Erro ao analisar";
   }
 
-  // repete continuamente
   setTimeout(loop, 500);
 }
 
-// iniciar automaticamente
+// iniciar
 loadModel();
 </script>
 
