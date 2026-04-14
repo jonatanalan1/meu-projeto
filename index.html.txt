@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Reconhecimento com IA</h2>
+
+<video id="video" autoplay playsinline width="400"></video>
+<br><br>
+
+<button onclick="predict()">Analisar</button>
+
+<h3 id="result">Aguardando...</h3>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
+
+<script>
+const video = document.getElementById("video");
+const result = document.getElementById("result");
+
+let model;
+
+// câmera
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    video.srcObject = stream;
+  });
+
+// carregar modelo
+async function loadModel() {
+  const URL = "model/";
+  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+}
+
+// analisar
+async function predict() {
+  if (!model) {
+    result.innerText = "Carregando modelo...";
+    await loadModel();
+  }
+
+  const prediction = await model.predict(video);
+
+  // pega o mais provável
+  let best = prediction[0];
+
+  for (let i = 1; i < prediction.length; i++) {
+    if (prediction[i].probability > best.probability) {
+      best = prediction[i];
+    }
+  }
+
+  result.innerText = "Detectado: " + best.className;
+}
+</script>
+
+</body>
+</html>
