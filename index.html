@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>IA Reconhecimento - v1.3</title>
+  <title>IA Reconhecimento - v2.0</title>
 </head>
 
 <body>
@@ -17,6 +17,20 @@
 
 <h3 id="result">Aguardando...</h3>
 
+<!-- QUADRO DO PROMPT -->
+<div id="promptBox" style="
+  margin-top:20px;
+  padding:15px;
+  background-color:#cceeff;
+  color:black;
+  font-weight:bold;
+  width:400px;
+">
+Prompt: aguardando...
+</div>
+
+<br>
+
 <img id="outputImage" width="300">
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0"></script>
@@ -25,22 +39,15 @@
 <script>
 const video = document.getElementById("video");
 const result = document.getElementById("result");
+const promptBox = document.getElementById("promptBox");
 const outputImage = document.getElementById("outputImage");
 
 // versão
-const version = "v1.2";
+const version = "v1.3";
 document.getElementById("version").innerText =
   "Versão: " + version + " | " + new Date().toLocaleTimeString();
 
 let model = null;
-
-// banco de imagens
-const imagens = {
-  cachorro: "https://placedog.net/400",
-  gato: "https://placekitten.com/400/400",
-  carro: "https://source.unsplash.com/400x400/?car",
-  casa: "https://source.unsplash.com/400x400/?house"
-};
 
 // iniciar câmera
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -88,12 +95,15 @@ async function loop() {
       }
     }
 
-    result.innerText = "Detectado: " + best.className;
+    let nome = best.className.toLowerCase().trim();
 
-    // troca imagem
-    if (imagens[best.className]) {
-      outputImage.src = imagens[best.className];
-    }
+    result.innerText = "Detectado: " + nome;
+
+    // GERAR PROMPT
+    let prompt = "desenho infantil de " + nome;
+
+    // MOSTRAR PROMPT
+    promptBox.innerText = "Prompt: " + prompt;
 
   } catch (error) {
     console.error(error);
@@ -103,7 +113,7 @@ async function loop() {
   setTimeout(loop, 500);
 }
 
-// iniciar
+// iniciar automaticamente
 loadModel();
 </script>
 
