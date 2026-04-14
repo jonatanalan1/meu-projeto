@@ -18,39 +18,66 @@
 const video = document.getElementById("video");
 const result = document.getElementById("result");
 
-let model;
+let model = null;
 
-// câmera
+// iniciar câmera
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => {
     video.srcObject = stream;
+  })
+  .catch(err => {
+    result.innerText = "Erro ao acessar câmera";
+    console.error(err);
   });
 
 // carregar modelo
 async function loadModel() {
-  const URL = "model/";
-  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+  try {
+    result.innerText = "Carregando modelo...";
+
+    const URL = "model/";
+
+    model = await tmImage.load(
+      URL + "model.json",
+      URL + "metadata.json"
+    );
+
+    result.innerText = "Modelo carregado. Clique em analisar.";
+
+  } catch (error) {
+    console.error("ERRO AO CARREGAR:", error);
+    result.innerText = "Erro ao carregar modelo";
+  }
 }
 
-// analisar
+// analisar imagem
 async function predict() {
-  if (!model) {
-    result.innerText = "Carregando modelo...";
-    await loadModel();
-  }
+  try {
 
-  const prediction = await model.predict(video);
-
-  // pega o mais provável
-  let best = prediction[0];
-
-  for (let i = 1; i < prediction.length; i++) {
-    if (prediction[i].probability > best.probability) {
-      best = prediction[i];
+    if (!model) {
+      await loadModel();
     }
-  }
 
-  result.innerText = "Detectado: " + best.className;
+    if (!model) return;
+
+    result.innerText = "Analisando...";
+
+    const prediction = await model.predict(video);
+
+    let best = prediction[0];
+
+    for (let i = 1; i < prediction.length; i++) {
+      if (prediction[i].probability > best.probability) {
+        best = prediction[i];
+      }
+    }
+
+    result.innerText = "Detectado: " + best.className;
+
+  } catch (error) {
+    console.error("ERRO NA PREVISÃO:", error);
+    result.innerText = "Erro ao analisar";
+  }
 }
 </script>
 
